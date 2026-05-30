@@ -15,6 +15,9 @@ COPY src ./src
 
 RUN yarn prisma generate && yarn build
 
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
+
 EXPOSE 3000
 
-CMD ["node", "dist/server.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
