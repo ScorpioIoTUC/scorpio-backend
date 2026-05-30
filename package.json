@@ -1,0 +1,27 @@
+{
+  "name": "scorpio-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Scorpio UC Project",
+  "main": "index.js",
+  "repository": "https://github.com/pedrozavalat/scorpio-backend.git",
+  "author": "PEDRO ZAVALA <pedropablozavalat@uc.cl>",
+  "license": "MIT",
+  "devDependencies": {
+    "@prisma/client": "^7.8.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.1",
+    "express": "^5.2.1",
+    "prisma": "^7.8.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "build": "tsc",
+    "start:prod": "node dist/server.js",
+    "seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  }
+}
