@@ -36,6 +36,11 @@ Use this when Dockerfiles and dependencies have not changed.
 docker compose up -d
 ```
 
+#### Update the API container without rebuilding the image
+```bash
+docker compose up -d --build api
+```
+
 ### Stop all services
 
 ```bash
