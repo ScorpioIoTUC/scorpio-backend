@@ -4,21 +4,6 @@ Backend API for the Scorpio UC project.
 
 ## Docker
 
-### Ver logs
-
-Para ver todo el stack:
-
-```bash
-docker compose logs -f
-```
-
-Para ver solo la API o la base de datos:
-
-```bash
-docker compose logs -f api
-docker compose logs -f db
-```
-
 ### Start the full stack from zero
 
 This starts Postgres, runs Prisma migrations inside the API container, and then seeds the database.
@@ -89,10 +74,50 @@ Use this when only the API source code has changed.
 docker compose build api
 docker compose up -d
 ```
+
+### Watch logs
+
+Logs from all containers:
+
+```bash
+docker compose logs -f
+```
+
+Filter the logs for the backend or api container.
+
+```bash
+docker compose logs -f api
+docker compose logs -f db
+```
+
 # Database
 ## Access to the Database
 To access the database, you can use the following command:
 
 ```bash
 docker compose exec db psql -U postgres -d postgres
+```
+
+## Create a new migration in Prisma
+
+Run this command after changing **schema.prisma**.
+
+Prisma now reads the database URL from `prisma.config.ts`, so `DATABASE_URL` must be set in your shell when you run it on the host.
+
+Example on the Raspberry Pi host:
+
+```bash
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres?schema=public" npx prisma migrate dev --name DESCRIPTIVE_NAME
+```
+
+If you run it inside Docker, the service name from `docker-compose.yml` works instead:
+
+```bash
+docker compose exec api npx prisma migrate dev --name DESCRIPTIVE_NAME
+```
+
+If you are using the API container, make sure the database container is already up.
+
+```bash
+npx prisma migrate dev --name DESCRIPTIVE_NAME
 ```

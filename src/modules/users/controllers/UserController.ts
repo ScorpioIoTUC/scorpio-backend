@@ -30,6 +30,11 @@ export class UserController {
   create = async (req: Request, res: Response): Promise<Response> => {
     try {
       console.log('[Users][CREATE] Request received');
+      if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({
+          message: 'Invalid request body.',
+        });
+      }
       const payload = req.body as CreateUserDTO;
       const createdUser = await this.createUser.execute(payload);
 
@@ -38,7 +43,10 @@ export class UserController {
       return res.status(201).json(createdUser);
     } catch (error) {
       console.error('[Users][CREATE] Failed to create user', error);
-      const message = error instanceof Error ? error.message : 'Unexpected error';
+      const message =
+        error instanceof Error
+          ? `Unexpected error: ${error.message}`
+          : 'Unexpected error. check the logs for more details';
       return res.status(400).json({ message });
     }
   };
@@ -80,9 +88,13 @@ export class UserController {
     if (Number.isNaN(id)) {
       return res.status(400).json({ message: 'Invalid user id' });
     }
-
     try {
       const payload = req.body as UpdateUserDTO;
+
+      if (payload.type) {
+        return res.status(400).json({ message: 'User type cannot be updated' });
+      }
+
       const updatedUser = await this.updateUser.execute(id, payload);
 
       if (!updatedUser) {
@@ -95,7 +107,10 @@ export class UserController {
       return res.status(200).json(updatedUser);
     } catch (error) {
       console.error('[Users][UPDATE] Failed to update user', error);
-      const message = error instanceof Error ? error.message : 'Unexpected error';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Unexpected error. Provide the user attributes to update';
       return res.status(400).json({ message });
     }
   };

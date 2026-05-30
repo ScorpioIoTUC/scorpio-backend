@@ -5,6 +5,8 @@ import { UpdateUserDTO } from '../dto/UpdateUserDTO';
 import { User } from '../entities/User';
 import { UserRepository } from './UserRepository';
 import { prisma } from '../../../lib/prisma';
+import bcrypt from "bcrypt";
+
 
 const toDomainUserType = (type: PrismaUserType): UserType =>
   type === PrismaUserType.ADMIN ? UserType.ADMIN : UserType.NORMAL;
@@ -20,13 +22,25 @@ const toDomainUser = (user: PrismaUser): User => ({
   type: toDomainUserType(user.type),
 });
 
+const toPublicUser = (user: PrismaUser): User => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  password: '', // Never expose the password
+  type: toDomainUserType(user.type),
+})
+
+
 export class PrismaUserRepository implements UserRepository {
   async create(data: CreateUserDTO): Promise<User> {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+
     const user = await prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
-        pwd_encrypted: data.password,
+        pwd_encrypted: hashedPassword,
         type: toPrismaUserType(data.type ?? UserType.NORMAL),
       },
     });
@@ -39,7 +53,7 @@ export class PrismaUserRepository implements UserRepository {
       where: { id },
     });
 
-    return user ? toDomainUser(user) : null;
+    return user ? toPublicUser(user) : null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -52,10 +66,10 @@ export class PrismaUserRepository implements UserRepository {
 
   async findAll(): Promise<User[]> {
     const users = await prisma.user.findMany({
-      orderBy: { id: 'asc' },
+      orderBy: { id: 'asc' }
     });
 
-    return users.map(toDomainUser);
+    return users.map(toPublicUser);
   }
 
   async update(id: number, data: UpdateUserDTO): Promise<User | null> {
@@ -73,7 +87,6 @@ export class PrismaUserRepository implements UserRepository {
         name: data.name ?? existingUser.name,
         email: data.email ?? existingUser.email,
         pwd_encrypted: data.password ?? existingUser.pwd_encrypted,
-        type: data.type ? toPrismaUserType(data.type) : existingUser.type,
       },
     });
 

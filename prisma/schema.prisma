@@ -42,6 +42,7 @@ model Satellite {
 
 model Station {
   id             Int      @id @default(autoincrement())
+  uuid           String   @unique
   name           String
   latitude       Float
   longitude      Float
@@ -49,7 +50,7 @@ model Station {
   status         Boolean  @default(false)
   creation_date  DateTime @default(now())
   last_seen      DateTime @default(now())
-  decoder_config Bytes
+  decoder_config Bytes?
   owner_id       Int
   owner_key_hash String
 
