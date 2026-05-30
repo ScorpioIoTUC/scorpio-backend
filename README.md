@@ -4,6 +4,21 @@ Backend API for the Scorpio UC project.
 
 ## Docker
 
+### Ver logs
+
+Para ver todo el stack:
+
+```bash
+docker compose logs -f
+```
+
+Para ver solo la API o la base de datos:
+
+```bash
+docker compose logs -f api
+docker compose logs -f db
+```
+
 ### Start the full stack from zero
 
 This starts Postgres, runs Prisma migrations inside the API container, and then seeds the database.
