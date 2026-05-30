@@ -84,3 +84,10 @@ Use this when only the API source code has changed.
 docker compose build api
 docker compose up -d
 ```
+# Database
+## Access to the Database
+To access the database, you can use the following command:
+
+```bash
+docker compose exec db psql -U postgres -d postgres
+```
