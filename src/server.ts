@@ -3,7 +3,7 @@ import { userRepository } from './modules/users/repositories/UserRepository';
 import { stationRepository } from './modules/stations/repositories/StationRepository';
 import { buildUserRoutes } from './routes/users.routes';
 import { buildStationRoutes } from './routes/stations.routes';
-import satellitesRoutes from './routes/satellites.routes';
+import { buildSatellitesRoutes } from './routes/satellites.routes';
 import packetsRoutes from './routes/packets.routes';
 
 const app = express();
@@ -16,7 +16,7 @@ app.get('/', (_req, res) => {
 });
 
 app.use('/users', buildUserRoutes(userRepository));
-app.use('/satellites', satellitesRoutes);
+app.use('/satellites', buildSatellitesRoutes());
 app.use('/stations', buildStationRoutes(stationRepository, userRepository));
 app.use('/packets', packetsRoutes);
 
