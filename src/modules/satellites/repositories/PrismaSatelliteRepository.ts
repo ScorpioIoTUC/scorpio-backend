@@ -65,13 +65,30 @@ export class PrismaSatelliteRepository implements SatelliteRepository {
     const limit = query.limit ?? 20;
     const page = query.page ?? 1;
     const skip = (page - 1) * limit;
+    const displayName = query.displayName ?? undefined;
+    const noradId = query.noradId ?? undefined;
 
     const [total, satellites] = await prisma.$transaction([
-      prisma.satellite.count(),
+      prisma.satellite.count({
+        where: {
+          display_name: {
+            contains: displayName,
+            mode: "insensitive",
+          },
+          norad_id: noradId,
+        }
+      }),
       prisma.satellite.findMany({
         orderBy: { display_name: 'asc' },
         skip,
         take: limit,
+        where: {
+          display_name: {
+            contains: displayName,
+            mode: "insensitive",
+          },
+          norad_id: noradId,
+        }
       }),
     ]);
 
@@ -84,6 +101,19 @@ export class PrismaSatelliteRepository implements SatelliteRepository {
         totalPages: total === 0 ? 0 : Math.ceil(total / limit),
       },
     };
+  }
+
+  async findOrCreateByNoradId(noradId: number): Promise<Satellite> {
+    const satellite = await prisma.satellite.upsert({
+      where: { norad_id: noradId },
+      create: {
+        norad_id: noradId,
+        display_name: `NORAD ${noradId}`,
+      },
+      update: {},
+    });
+
+    return toDomainSatellite(satellite);
   }
 
   async upsertMany(satellites: UpsertSatelliteDTO[]): Promise<UpsertSatellitesResultDTO> {

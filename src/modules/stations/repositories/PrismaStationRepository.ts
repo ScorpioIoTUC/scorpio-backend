@@ -11,7 +11,6 @@ import type { Station as PrismaStation } from '../../../generated/prisma/client'
 const generateOwnerKey = (): { ownerKey: string; ownerKeyHash: string } => {
     const ownerKey = crypto.randomBytes(32).toString('base64url');
     const ownerKeyHash = crypto.createHash('sha256').update(ownerKey).digest('hex');
-
     return { ownerKey, ownerKeyHash };
 };
 
@@ -41,11 +40,9 @@ const toPrismaDecoderConfig = (decoderConfig: UpdateStationDTO['decoderConfig'])
     if (decoderConfig === undefined) {
         return undefined;
     }
-
     if (decoderConfig === null) {
         return null;
     }
-
     return Uint8Array.from(decoderConfig) as Uint8Array<ArrayBuffer>;
 };
 
@@ -53,9 +50,7 @@ export class PrismaStationRepository implements StationRepository {
     async create(data: CreateStationDTO): Promise<StationCredentials | null> {
         const stationUuid = crypto.randomUUID();
         const { ownerKey, ownerKeyHash } = generateOwnerKey();
-
         const creationDate = new Date();
-
         const station = await prisma.station.create({
             data: {
                 name: data.name,
@@ -76,14 +71,12 @@ export class PrismaStationRepository implements StationRepository {
     async findAll(query: ListStationsDTO): Promise<Station[]> {
         const limit = query.limit ?? 100;
         const page = query.page ?? 1;
-
         const stations = await prisma.station.findMany({
             where: query.ownerId !== undefined ? { owner_id: query.ownerId } : undefined,
             orderBy: { id: 'asc' },
             skip: (page - 1) * limit,
             take: limit,
         });
-
         return stations.map(toDomainStation);
     }
 
@@ -91,19 +84,34 @@ export class PrismaStationRepository implements StationRepository {
         const station = await prisma.station.findUnique({
             where: { uuid },
         });
-
         return station ? toDomainStation(station) : null;
+    }
+
+    async findAuthByUuid(uuid: string): Promise<{ id: number; uuid: string; ownerKeyHash: string } | null> {
+        const station = await prisma.station.findUnique({
+            where: { uuid },
+            select: {
+                id: true,
+                uuid: true,
+                owner_key_hash: true,
+            },
+        });
+        return station
+            ? {
+                id: station.id,
+                uuid: station.uuid,
+                ownerKeyHash: station.owner_key_hash,
+            }
+            : null;
     }
 
     async update(uuid: string, data: UpdateStationDTO): Promise<Station | null> {
         const existingStation = await prisma.station.findUnique({
             where: { uuid },
         });
-
         if (!existingStation) {
             return null;
         }
-
         const updatedStation = await prisma.station.update({
             where: { uuid },
             data: {
@@ -114,23 +122,28 @@ export class PrismaStationRepository implements StationRepository {
                 decoder_config: toPrismaDecoderConfig(data.decoderConfig) ?? existingStation.decoder_config,
             },
         });
-
         return toDomainStation(updatedStation);
+    }
+
+    async updateLastSeen(uuid: string): Promise<void> {
+        await prisma.station.update({
+            where: { uuid },
+            data: {
+                last_seen: new Date(),
+            },
+        });
     }
 
     async delete(uuid: string): Promise<boolean> {
         const existingStation = await prisma.station.findUnique({
             where: { uuid },
         });
-
         if (!existingStation) {
             return false;
         }
-
         await prisma.station.delete({
             where: { uuid },
         });
-
         return true;
     }
 
@@ -138,18 +151,14 @@ export class PrismaStationRepository implements StationRepository {
         const existingStation = await prisma.station.findUnique({
             where: { uuid },
         });
-
         if (!existingStation) {
             return null;
         }
-
         const { ownerKey, ownerKeyHash } = generateOwnerKey();
-
         const station = await prisma.station.update({
             where: { uuid },
             data: { owner_key_hash: ownerKeyHash },
         });
-
         return toDomainStationCredentials(station, ownerKey, ownerKeyHash);
     }
 }

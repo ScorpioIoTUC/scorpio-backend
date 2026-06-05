@@ -28,25 +28,25 @@ model User {
 }
 
 model Satellite {
-  id               Int       @id @default(autoincrement())
-  norad_id         Int       @unique
-  display_name     String
-  object_id        String?
-  epoch            DateTime?
-  mean_motion      Float?
-  eccentricity     Float?
-  inclination      Float?
-  ra_of_asc_node   Float?
+  id                Int       @id @default(autoincrement())
+  norad_id          Int       @unique
+  display_name      String
+  object_id         String?
+  epoch             DateTime?
+  mean_motion       Float?
+  eccentricity      Float?
+  inclination       Float?
+  ra_of_asc_node    Float?
   arg_of_pericenter Float?
-  mean_anomaly     Float?
-  bstar            Float?
-  mean_motion_dot  Float?
-  mean_motion_ddot Float?
-  tle1             String?
-  tle2             String?
-  tle_updated_at   DateTime?
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
+  mean_anomaly      Float?
+  bstar             Float?
+  mean_motion_dot   Float?
+  mean_motion_ddot  Float?
+  tle1              String?
+  tle2              String?
+  tle_updated_at    DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
 
   packets Packet[] @relation("SatellitePackets")
 }
@@ -70,7 +70,7 @@ model Station {
 }
 
 model Packet {
-  id                  Int     @id @default(autoincrement())
+  id                  Int      @id @default(autoincrement())
   station_id          Int
   satellite_id        Int
   satellite_latitude  Float
@@ -83,6 +83,7 @@ model Packet {
   frec_error          Float
   crc                 Boolean
   raw_payload         Bytes
+  created_at          DateTime @default(now())
 
   station   Station   @relation("StationPackets", fields: [station_id], references: [id])
   satellite Satellite @relation("SatellitePackets", fields: [satellite_id], references: [id])

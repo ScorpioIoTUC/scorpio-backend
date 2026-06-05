@@ -27,9 +27,13 @@ export class SatelliteController {
   list = async (req: Request, res: Response): Promise<Response> => {
     const pageRaw = req.query.page;
     const limitRaw = req.query.limit;
+    const noradIdRaw = req.query.noradId;
+    const displayNameRaw = req.query.displayName;
 
     const page = pageRaw === undefined ? 1 : Number(pageRaw);
     const limit = limitRaw === undefined ? 20 : Number(limitRaw);
+    const noradId = noradIdRaw === undefined ? undefined : Number(noradIdRaw);
+    const displayName = typeof displayNameRaw === 'string' ? displayNameRaw : undefined;
 
     if (typeof pageRaw !== 'undefined' && (typeof pageRaw !== 'string' || Number.isNaN(page))) {
       return res.status(400).json({ message: 'Invalid page' });
@@ -37,6 +41,10 @@ export class SatelliteController {
 
     if (typeof limitRaw !== 'undefined' && (typeof limitRaw !== 'string' || Number.isNaN(limit))) {
       return res.status(400).json({ message: 'Invalid limit' });
+    }
+
+    if (typeof noradIdRaw !== 'undefined' && (typeof noradIdRaw !== 'string' || Number.isNaN(noradId))) {
+      return res.status(400).json({ message: 'Invalid noraId' });
     }
 
     if (page < 1) {
@@ -47,7 +55,7 @@ export class SatelliteController {
       return res.status(400).json({ message: 'Limit must be between 1 and 100' });
     }
 
-    const query: ListSatellitesDTO = { page, limit };
+    const query: ListSatellitesDTO = { page, limit, noradId, displayName };
     const satellites = await this.listSatellites.listSatellites(query);
 
     return res.status(200).json(satellites);

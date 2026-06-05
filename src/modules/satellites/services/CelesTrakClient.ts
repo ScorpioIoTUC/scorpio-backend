@@ -12,9 +12,9 @@ export class FetchCelesTrakClient implements CelesTrakClient {
     'https://celestrak.org/NORAD/elements/gp.php?GROUP=ACTIVE&FORMAT=JSON';
 
   async downloadActiveSatellites(): Promise<string> {
-    if (this.useMockData) {
-      return readFile(this.mockDataPath, 'utf-8');
-    }
+    // if (this.useMockData) {
+    //   return readFile(this.mockDataPath, 'utf-8');
+    // }
 
     const response = await fetch(this.activeSatellitesUrl);
 
