@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserType {
+  NORMAL @map("normal")
+  ADMIN  @map("admin")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  pwd_encrypted String
+  type          UserType @default(NORMAL)
+
+  stations Station[] @relation("OwnedStations")
+}
+
+model Satellite {
+  id                Int       @id @default(autoincrement())
+  norad_id          Int       @unique
+  display_name      String
+  object_id         String?
+  epoch             DateTime?
+  mean_motion       Float?
+  eccentricity      Float?
+  inclination       Float?
+  ra_of_asc_node    Float?
+  arg_of_pericenter Float?
+  mean_anomaly      Float?
+  bstar             Float?
+  mean_motion_dot   Float?
+  mean_motion_ddot  Float?
+  tle1              String?
+  tle2              String?
+  tle_updated_at    DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  packets Packet[] @relation("SatellitePackets")
+}
+
+model Station {
+  id             Int      @id @default(autoincrement())
+  uuid           String   @unique
+  name           String
+  latitude       Float
+  longitude      Float
+  altitude       Float
+  status         Boolean  @default(false)
+  creation_date  DateTime @default(now())
+  last_seen      DateTime @default(now())
+  decoder_config Bytes?
+  owner_id       Int
+  owner_key_hash String
+
+  owner   User     @relation("OwnedStations", fields: [owner_id], references: [id])
+  packets Packet[] @relation("StationPackets")
+}
+
+model Packet {
+  id                  Int      @id @default(autoincrement())
+  station_id          Int
+  satellite_id        Int
+  satellite_latitude  Float
+  satellite_longitude Float
+  satellite_altitude  Float
+  slant_distance      Float
+  angle_elevation     Float
+  rssi                Float
+  snr                 Float
+  frec_error          Float
+  crc                 Boolean
+  raw_payload         Bytes
+  created_at          DateTime @default(now())
+
+  station   Station   @relation("StationPackets", fields: [station_id], references: [id])
+  satellite Satellite @relation("SatellitePackets", fields: [satellite_id], references: [id])
+}
