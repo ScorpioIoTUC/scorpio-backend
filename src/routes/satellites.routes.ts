@@ -1,9 +1,16 @@
 import { Router } from 'express';
+import { SatelliteController } from '../modules/satellites/controllers/SatelliteController';
+import { satelliteRepository } from '../modules/satellites/repositories/SatelliteRepository';
+import { FetchCelesTrakClient } from '../modules/satellites/services/CelesTrakClient';
 
-const router = Router();
+export const buildSatellitesRoutes = (): Router => {
+  const router = Router();
+  const satelliteController = SatelliteController.build(satelliteRepository, new FetchCelesTrakClient());
 
-router.all('/', (_req, res) => {
-  res.status(501).json({ message: 'Satellites module not implemented yet' });
-});
+  router.get('/', satelliteController.list);
+  router.post('/upsert', satelliteController.upsert);
 
-export default router;
+  return router;
+};
+
+export default buildSatellitesRoutes;

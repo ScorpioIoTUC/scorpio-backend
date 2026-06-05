@@ -1,9 +1,18 @@
 import { Router } from 'express';
+import { PacketController } from '../modules/packets/controllers/PacketController';
+import { packetRepository } from '../modules/packets/repositories/PacketRepository';
+import { satelliteRepository } from '../modules/satellites/repositories/SatelliteRepository';
+import { stationRepository } from '../modules/stations/repositories/StationRepository';
 
-const router = Router();
+export const buildPacketRoutes = (): Router => {
+    const router = Router();
+    const packetController = PacketController.build(packetRepository, stationRepository, satelliteRepository);
 
-router.all('/', (_req, res) => {
-  res.status(501).json({ message: 'Packets module not implemented yet' });
-});
+    router.get('/', packetController.list);
+    router.post('/', packetController.create);
+    return router;
+}
 
-export default router;
+
+
+export default buildPacketRoutes;

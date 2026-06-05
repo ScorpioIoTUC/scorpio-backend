@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { UserController } from '../modules/users/controllers/UserController';
-import { UserRepository } from '../modules/users/repositories/UserRepository';
+import { userRepository } from '../modules/users/repositories/UserRepository';
 
-export const buildUserRoutes = (userRepository: UserRepository): Router => {
+export const buildUserRoutes = (): Router => {
   const router = Router();
   const userController = UserController.build(userRepository);
 

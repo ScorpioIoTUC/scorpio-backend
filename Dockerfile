@@ -12,6 +12,8 @@ RUN yarn install --frozen-lockfile
 
 COPY tsconfig.json ./tsconfig.json
 COPY src ./src
+# TODO: Remove this
+COPY data ./data 
 
 RUN yarn prisma generate && yarn build
 
