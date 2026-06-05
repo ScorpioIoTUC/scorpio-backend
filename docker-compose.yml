@@ -32,3 +32,8 @@ services:
 
 volumes:
   db_data:
+
+networks:
+  default:
+    external: true
+    name: scorpio-net
