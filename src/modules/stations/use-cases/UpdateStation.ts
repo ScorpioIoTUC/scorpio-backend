@@ -9,7 +9,7 @@ export class UpdateStation {
   constructor(private readonly stationRepository: StationRepository) {}
 
   async execute(uuid: string, data: UpdateStationDTO, user: AuthenticatedUser): Promise<Station | null> {
-    const owner = await this.stationRepository.findByOwnerId(user.id);
+    const owner = await this.stationRepository.findByOwnerId(uuid, user.id);
     if (!owner && user.type !== UserType.ADMIN) {
       return null;
     }

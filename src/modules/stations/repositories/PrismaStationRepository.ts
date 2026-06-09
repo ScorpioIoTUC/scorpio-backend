@@ -105,8 +105,10 @@ export class PrismaStationRepository implements StationRepository {
             : null;
     }
 
-    async findByOwnerId(ownerId: number): Promise<Station | null> {
-        const station = await prisma.station.findUnique({ where: { owner_id: ownerId } });
+    async findByOwnerId(uuid: string, ownerId: number): Promise<Station | null> {
+        const station = await prisma.station.findFirst(
+            { where: { owner_id: ownerId, uuid: uuid } }
+        );
         return station ? toDomainStation(station) : null;
     }
 

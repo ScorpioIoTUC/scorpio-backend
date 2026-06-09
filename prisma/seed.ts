@@ -1,5 +1,6 @@
 import { PrismaClient, UserType } from '../src/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import * as bcrypt from 'bcrypt';
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -8,28 +9,31 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 async function main(): Promise<void> {
-  const users = [
-    {
-      name: 'Pedro Zavala',
-      email: 'pedro@example.com',
-      pwd_encrypted: 'hashed-password-1',
-      type: UserType.ADMIN,
-    },
-    {
-      name: 'Maria Lopez',
-      email: 'maria@example.com',
-      pwd_encrypted: 'hashed-password-2',
-      type: UserType.NORMAL,
-    },
-  ];
-
-  for (const user of users) {
-    await prisma.user.upsert({
-      where: { email: user.email },
-      update: user,
-      create: user,
-    });
+  const saltRounds = 10;
+  const adminPwd = process.env.ADMIN_PWD;
+  if (!adminPwd) {
+    throw new Error('ADMIN_PWD is not defined');
   }
+  const hashedPassword = await bcrypt.hash(adminPwd, saltRounds);
+  const admin = {
+    name: 'admin',
+    email: 'scorpioiotuc@gmail.com',
+    pwd_encrypted: hashedPassword,
+    type: UserType.ADMIN,
+  };
+  await prisma.user.upsert({
+    where: { email: admin.email },
+    update: {
+      name: admin.name,
+      pwd_encrypted: admin.pwd_encrypted,
+      type: admin.type,
+    },
+    create: {
+      name: admin.name,
+      pwd_encrypted: admin.pwd_encrypted,
+      type: admin.type,
+    },
+  });
 }
 
 main()

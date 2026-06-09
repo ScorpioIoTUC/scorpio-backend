@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
 
-yarn prisma migrate deploy
-yarn seed
+npx prisma migrate deploy
+npx ts-node prisma/seed.ts
 exec node dist/server.js

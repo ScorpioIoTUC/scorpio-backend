@@ -8,7 +8,7 @@ export class RegenerateStationKey {
   constructor(private readonly stationRepository: StationRepository) {}
 
   async execute(uuid: string, user: AuthenticatedUser): Promise<StationCredentials | null> {
-    const owner = await this.stationRepository.findByOwnerId(user.id);
+    const owner = await this.stationRepository.findByOwnerId(uuid, user.id);
     if (!owner && user.type !== UserType.ADMIN) {
       return null;
     }

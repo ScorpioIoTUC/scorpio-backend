@@ -11,7 +11,7 @@ export class DeleteStation {
     if (!existingStation) {
       return false;
     }
-    const owner = await this.stationRepository.findByOwnerId(user.id);
+    const owner = await this.stationRepository.findByOwnerId(uuid, user.id);
     if (!owner && user.type !== UserType.ADMIN) {
       return false;
     }
