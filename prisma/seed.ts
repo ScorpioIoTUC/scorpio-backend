@@ -30,6 +30,7 @@ async function main(): Promise<void> {
     },
     create: {
       name: admin.name,
+      email: admin.email,
       pwd_encrypted: admin.pwd_encrypted,
       type: admin.type,
     },

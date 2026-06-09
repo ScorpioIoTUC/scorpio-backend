@@ -35,7 +35,7 @@ export class AuthController {
       });
       if (!result) {
         console.error('[Users][SIGNUP] Failed to sign up', result);
-        return res.status(409).json(result)
+        return res.status(409).json({"message": "User already exists."})
       }
       console.log('[Users][SIGNUP] User signed up successfully');
       return res.status(200).json(result)
