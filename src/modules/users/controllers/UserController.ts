@@ -7,6 +7,7 @@ import { DeleteUser } from '../use-cases/DeleteUser';
 import { GetUser } from '../use-cases/GetUser';
 import { ListUsers } from '../use-cases/ListUsers';
 import { UpdateUser } from '../use-cases/UpdateUser';
+import { UserType } from '../entities/User';
 
 export class UserController {
   private readonly createUser: CreateUser;
@@ -88,6 +89,13 @@ export class UserController {
     if (Number.isNaN(id)) {
       return res.status(400).json({ message: 'Invalid user id' });
     }
+    const user = req.user;
+    if (!user) {
+      return res.status(404).json({message: 'Forbidden credentials'});
+    }
+    if (user.id != id && user.type !== UserType.ADMIN) {
+      return res.status(404).json({message: 'You are not allowed to update this user.'});
+    }
     try {
       const payload = req.body as UpdateUserDTO;
 
@@ -117,6 +125,13 @@ export class UserController {
 
   delete = async (req: Request, res: Response): Promise<Response> => {
     const id = Number(req.params.id);
+    const user = req.user;
+    if (!user) {
+      return res.status(404).json({message: 'Forbidden credentials'});
+    }
+    if (user.id != id && user.type !== UserType.ADMIN) {
+      return res.status(404).json({message: 'You are not allowed to delete this user.'});
+    }
 
     console.log('[Users][DELETE] Request received', { id: req.params.id });
 

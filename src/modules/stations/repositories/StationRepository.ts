@@ -15,6 +15,7 @@ export interface StationRepository {
     findAll(query: ListStationsDTO): Promise<Station[]>;
     findByUuid(uuid: string): Promise<Station | null>;
     findAuthByUuid(uuid: string): Promise<StationAuthData | null>;
+    findByOwnerId(ownerId: number): Promise<Station | null>;
     update(uuid: string, data: UpdateStationDTO): Promise<Station | null>;
     updateLastSeen(uuid: string): Promise<void>;
     delete(uuid: string): Promise<boolean>;

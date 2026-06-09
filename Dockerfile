@@ -4,18 +4,17 @@ WORKDIR /app
 
 RUN corepack enable
 
-COPY package.json yarn.lock ./
+COPY package.json package-lock.json ./
+
 COPY prisma ./prisma
 COPY prisma.config.ts ./prisma.config.ts
 
-RUN yarn install --frozen-lockfile
+RUN npm ci
 
 COPY tsconfig.json ./tsconfig.json
 COPY src ./src
-# TODO: Remove this
-COPY data ./data 
 
-RUN yarn prisma generate && yarn build
+RUN npx prisma generate && npm run build
 
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh

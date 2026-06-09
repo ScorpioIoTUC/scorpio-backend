@@ -1,17 +1,18 @@
 import { Router } from 'express';
 import { StationController } from '../modules/stations/controllers/StationController';
 import { stationRepository } from '../modules/stations/repositories/StationRepository';
-import { userRepository } from '../modules/users/repositories/UserRepository';
+import { authMiddleware } from '../middlewares/AuthMiddleware';
+
 
 export const buildStationRoutes = (): Router => {
   const router = Router();
-  const stationController = StationController.build(stationRepository, userRepository);
+  const stationController = StationController.build(stationRepository);
 
-  router.post('/', stationController.create);
   router.get('/', stationController.list);
-  router.patch('/:uuid', stationController.update);
-  router.delete('/:uuid', stationController.delete);
-  router.post('/:uuid/regenerate-key', stationController.regenerateKey);
+  router.post('/', authMiddleware, stationController.create);
+  router.patch('/:uuid', authMiddleware, stationController.update);
+  router.delete('/:uuid', authMiddleware, stationController.delete);
+  router.post('/:uuid/regenerate-key', authMiddleware, stationController.regenerateKey);
 
   return router;
 }

@@ -1,5 +1,3 @@
-import bcrypt from 'bcrypt';
-
 import { UserRepository } from "../../users/repositories/UserRepository";
 import { SignUpDTO } from "../dto/SignUpDTO";
 import { SignUpResponseDTO } from "../dto/SignUpResponseDTO";
