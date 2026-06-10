@@ -1,4 +1,4 @@
-# scorpio-backend
+# Scorpio API 🦂
 
 Backend API for the Scorpio UC project.
 
@@ -12,6 +12,7 @@ This starts Postgres, runs Prisma migrations inside the API container, and then 
 docker compose down -v
 docker compose up --build
 ```
+The first command will remove the database volumes, so you will start with an empty Postgres DB.
 
 ### Start the full stack without rebuilding images
 
@@ -40,42 +41,31 @@ Use this when you want to start fresh again later. If you run `up` after this, t
 docker compose down
 ```
 
-### Reset the database
-
-This removes the database volume too, so you start with an empty Postgres again.
-
-```bash
-docker compose down -v
-docker compose up --build
-```
-
+## Prisma
 ### Create a new migration
 
-When the stack is up, create migrations from the API container:
-
+When the stack is up, create migrations from the API container. 
+This will create a new migration inside the docker service. 
 ```bash
-docker compose up -d
-docker compose exec api yarn prisma migrate dev --name add_feature_name
+docker compose exec api yarn prisma migrate dev --name <feature-name>
+```
+Note: Run this command after changing **schema.prisma**. Prisma reads the database URL from `prisma.config.ts`, so `DATABASE_URL` must be set in your shell when you run it on the host.
+
+Example of the database url on the Raspberry Pi host:
+```bash
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
 ```
 
-### Reseed the database
-
-The seed is already executed on API startup. If you want to run it again manually:
-
-```bash
-docker compose exec api yarn seed
-```
-
-### Rebuild only the API image
-
-Use this when only the API source code has changed.
+### Access to the Database
+To access the database, you can use the following command:
 
 ```bash
-docker compose build api
-docker compose up -d
+docker compose exec db psql -U postgres -d postgres
 ```
 
-### Watch logs
+
+
+# Watch logs
 
 Logs from all containers:
 
@@ -90,34 +80,10 @@ docker compose logs -f api
 docker compose logs -f db
 ```
 
-# Database
-## Access to the Database
-To access the database, you can use the following command:
-
+# Development
+This that you should consider before starting the stack:
+- You must include an environment file in your main directory. Refer to the '.env.example' file for details of the variables required to work in the development environment of this API. 
+- If you would like to receive packets from the MQTT stack installed in ScorpioProject, you must have created a Docker network. If you haven't already created a network on the Raspberry Pi, you should run this command:
 ```bash
-docker compose exec db psql -U postgres -d postgres
+docker network create scorpio-net
 ```
-
-## Create a new migration in Prisma
-
-Run this command after changing **schema.prisma**.
-
-Prisma now reads the database URL from `prisma.config.ts`, so `DATABASE_URL` must be set in your shell when you run it on the host.
-
-Example on the Raspberry Pi host:
-
-```bash
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres?schema=public" npx prisma migrate dev --name DESCRIPTIVE_NAME
-```
-
-If you run it inside Docker, the service name from `docker-compose.yml` works instead:
-
-```bash
-docker compose exec api npx prisma migrate dev --name DESCRIPTIVE_NAME
-```
-
-If you are using the API container, make sure the database container is already up.
-
-```bash
-npx prisma migrate dev --name DESCRIPTIVE_NAME
-```refactor_satellite_omm_orbital_elements

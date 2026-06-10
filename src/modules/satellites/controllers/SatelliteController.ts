@@ -4,7 +4,7 @@ import { SatelliteRepository } from '../repositories/SatelliteRepository';
 import { CelesTrakClient } from '../services/CelesTrakClient';
 import { ListSatellites } from '../use-cases/ListSatellites';
 import { UpsertSatellites } from '../use-cases/UpsertSatellites';
-
+import { UserType } from '../../users/entities/User';
 export class SatelliteController {
   private readonly listSatellites: ListSatellites;
   private readonly upsertSatellites: UpsertSatellites;
@@ -61,8 +61,15 @@ export class SatelliteController {
     return res.status(200).json(satellites);
   };
 
-  upsert = async (_req: Request, res: Response): Promise<Response> => {
+  upsert = async (req: Request, res: Response): Promise<Response> => {
     try {
+      const user = req.user
+      if (!user) {
+        return res.status(404).json({ message: 'Forbidden credentials' });
+      }
+      if (user.type != UserType.ADMIN) {
+        return res.status(400).json({ message: 'User is not admin.' });
+      }
       const result = await this.upsertSatellites.upsertSatellites();
 
       return res.status(200).json(result);

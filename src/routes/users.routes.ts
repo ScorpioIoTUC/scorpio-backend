@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { UserController } from '../modules/users/controllers/UserController';
 import { userRepository } from '../modules/users/repositories/UserRepository';
+import { authMiddleware } from '../middlewares/AuthMiddleware';
 
 export const buildUserRoutes = (): Router => {
   const router = Router();
@@ -9,8 +10,8 @@ export const buildUserRoutes = (): Router => {
   router.post('/', userController.create);
   router.get('/', userController.list);
   router.get('/:id', userController.get);
-  router.patch('/:id', userController.update);
-  router.delete('/:id', userController.delete);
+  router.patch('/:id', authMiddleware, userController.update);
+  router.delete('/:id', authMiddleware, userController.delete);
 
   return router;
 };

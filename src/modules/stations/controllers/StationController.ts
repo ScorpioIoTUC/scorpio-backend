@@ -19,27 +19,32 @@ export class StationController {
 
   constructor(
     private readonly stationRepository: StationRepository,
-    private readonly userRepository: UserRepository,
   ) {
-    this.createStation = new CreateStation(this.stationRepository, this.userRepository);
+    this.createStation = new CreateStation(this.stationRepository);
     this.listStations = new ListStations(this.stationRepository);
     this.updateStation = new UpdateStation(this.stationRepository);
     this.deleteStation = new DeleteStation(this.stationRepository);
     this.regenerateStationKey = new RegenerateStationKey(this.stationRepository);
   }
 
-  public static build(stationRepository: StationRepository, userRepository: UserRepository): StationController {
-    return new StationController(stationRepository, userRepository);
+  public static build(stationRepository: StationRepository): StationController {
+    return new StationController(stationRepository);
   }
 
   create = async (req: Request, res: Response): Promise<Response> => {
     try {
+      const user = req.user;
+      if (!user) {
+        return res.status(404).json({message: 'Forbidden credentials'});
+      }
+      const userId = user.id; // Owner id
       if (!req.body || typeof req.body !== 'object') {
         return res.status(400).json({
           message: 'Invalid request body.',
         });
       }
       const payload = req.body as CreateStationDTO;
+      payload.ownerId = userId;
       const stationCredentials = await this.createStation.execute(payload);
       if (!stationCredentials) {
         return res.status(404).json({ message: 'Owner user not found' });
@@ -96,6 +101,11 @@ export class StationController {
   };
 
   update = async (req: Request, res: Response): Promise<Response> => {
+    const user = req.user;
+    if (!user) {
+      return res.status(404).json({message: 'Forbidden credentials'});
+    }
+    
     const uuid = String(req.params.uuid);
 
     if (!uuid) {
@@ -108,23 +118,27 @@ export class StationController {
 
     const payload = req.body as UpdateStationDTO;
 
-    const updatedStation = await this.updateStation.execute(uuid, payload);
+    const updatedStation = await this.updateStation.execute(uuid, payload, user);
 
     if (!updatedStation) {
-      return res.status(404).json({ message: 'Station not found' });
+      return res.status(404).json({ message: 'Station not found or the user is not the owner' });
     }
 
     return res.status(200).json(updatedStation);
   };
 
   delete = async (req: Request, res: Response): Promise<Response> => {
+    const user = req.user
+    if (!user) {
+      return res.status(404).json({message: 'Forbidden credentials'});
+    }
     const uuid = String(req.params.uuid);
 
     if (!uuid) {
       return res.status(400).json({ message: 'Invalid station uuid' });
     }
 
-    const deleted = await this.deleteStation.execute(uuid);
+    const deleted = await this.deleteStation.execute(uuid, user);
 
     if (!deleted) {
       return res.status(404).json({ message: 'Station not found' });
@@ -134,13 +148,17 @@ export class StationController {
   };
 
   regenerateKey = async (req: Request, res: Response): Promise<Response> => {
+    const user = req.user
+    if (!user) {
+      return res.status(404).json({message: 'Forbidden credentials'});
+    } 
     const uuid = String(req.params.uuid);
 
     if (!uuid) {
       return res.status(400).json({ message: 'Invalid station uuid' });
     }
 
-    const stationCredentials = await this.regenerateStationKey.execute(uuid);
+    const stationCredentials = await this.regenerateStationKey.execute(uuid, user);
 
     if (!stationCredentials) {
       return res.status(404).json({ message: 'Station not found' });

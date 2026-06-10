@@ -3,6 +3,7 @@ import { buildUserRoutes } from './routes/users.routes';
 import { buildStationRoutes } from './routes/stations.routes';
 import { buildSatellitesRoutes } from './routes/satellites.routes';
 import { buildPacketRoutes } from './routes/packets.routes';
+import buildAuthRoutes from './routes/auth.routes';
 
 
 const app = express();
@@ -18,6 +19,7 @@ app.use('/users', buildUserRoutes());
 app.use('/satellites', buildSatellitesRoutes());
 app.use('/stations', buildStationRoutes());
 app.use('/packets', buildPacketRoutes());
+app.use('/auth', buildAuthRoutes());
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`[API] Service running at http://localhost:${port}`);
