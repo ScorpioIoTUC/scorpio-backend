@@ -102,8 +102,27 @@ export class PrismaUserRepository implements UserRepository {
       return false;
     }
 
-    await prisma.user.delete({
-      where: { id },
+    await prisma.$transaction(async (tx) => {
+      const stations = await tx.station.findMany({
+        where: { owner_id: id },
+        select: { id: true },
+      });
+
+      const stationIds = stations.map((station) => station.id);
+
+      if (stationIds.length > 0) {
+        await tx.packet.deleteMany({
+          where: { station_id: { in: stationIds } },
+        });
+      }
+
+      await tx.station.deleteMany({
+        where: { owner_id: id },
+      });
+
+      await tx.user.delete({
+        where: { id },
+      });
     });
 
     return true;
