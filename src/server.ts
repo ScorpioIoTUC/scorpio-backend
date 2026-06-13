@@ -1,13 +1,17 @@
 import express from 'express';
+import cors from 'cors';
 import { buildUserRoutes } from './routes/users.routes';
 import { buildStationRoutes } from './routes/stations.routes';
 import { buildSatellitesRoutes } from './routes/satellites.routes';
 import { buildPacketRoutes } from './routes/packets.routes';
+import { buildStatsRoutes } from './routes/stats.routes';
 import buildAuthRoutes from './routes/auth.routes';
 
 
 const app = express();
 const port = Number(process.env.PORT ?? 8432);
+
+app.use(cors());
 
 app.use(express.json());
 
@@ -19,6 +23,7 @@ app.use('/users', buildUserRoutes());
 app.use('/satellites', buildSatellitesRoutes());
 app.use('/stations', buildStationRoutes());
 app.use('/packets', buildPacketRoutes());
+app.use('/stats', buildStatsRoutes());
 app.use('/auth', buildAuthRoutes());
 
 app.listen(port, '0.0.0.0', () => {

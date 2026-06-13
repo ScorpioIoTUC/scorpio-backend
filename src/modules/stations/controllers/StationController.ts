@@ -3,12 +3,12 @@ import { CreateStationDTO } from '../dto/CreateStationDTO';
 import { ListStationsDTO } from '../dto/ListStationsDTO';
 import { UpdateStationDTO } from '../dto/UpdateStationDTO';
 import { StationRepository } from '../repositories/StationRepository';
-import { UserRepository } from '../../users/repositories/UserRepository';
 import { CreateStation } from '../use-cases/CreateStation';
 import { DeleteStation } from '../use-cases/DeleteStation';
 import { ListStations } from '../use-cases/ListStations';
 import { RegenerateStationKey } from '../use-cases/RegenerateStationKey';
 import { UpdateStation } from '../use-cases/UpdateStation';
+import { PacketRepository } from '../../packets/repositories/PacketRepository';
 
 export class StationController {
   private readonly createStation: CreateStation;
@@ -19,16 +19,17 @@ export class StationController {
 
   constructor(
     private readonly stationRepository: StationRepository,
+    private readonly packetRepository: PacketRepository,
   ) {
     this.createStation = new CreateStation(this.stationRepository);
     this.listStations = new ListStations(this.stationRepository);
     this.updateStation = new UpdateStation(this.stationRepository);
-    this.deleteStation = new DeleteStation(this.stationRepository);
+    this.deleteStation = new DeleteStation(this.stationRepository, this.packetRepository);
     this.regenerateStationKey = new RegenerateStationKey(this.stationRepository);
   }
 
-  public static build(stationRepository: StationRepository): StationController {
-    return new StationController(stationRepository);
+  public static build(stationRepository: StationRepository, packetRepository: PacketRepository): StationController {
+    return new StationController(stationRepository, packetRepository);
   }
 
   create = async (req: Request, res: Response): Promise<Response> => {

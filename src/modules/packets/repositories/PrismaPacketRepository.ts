@@ -1,6 +1,7 @@
 import { Prisma } from '../../../generated/prisma/client';
 import { prisma } from '../../../lib/prisma';
 import { CreatePacketDTO } from '../dto/CreatePacketDTO';
+import { DeletePacketsDTO } from '../dto/DeletePacketsDTO';
 import { ListPacketsDTO } from '../dto/ListPacketsDTO';
 import { ListPacketsResponseDTO } from '../dto/ListPacketsResponseDTO';
 import { PacketRepository } from './PacketRepository';
@@ -150,5 +151,9 @@ export class PrismaPacketRepository implements PacketRepository {
         totalPages: total === 0 ? 0 : Math.ceil(total / limit),
       },
     };
+  }
+
+  async deleteAll(query: DeletePacketsDTO): Promise<void> {
+    await prisma.packet.deleteMany({ where: { station_id: query.stationId } });
   }
 }
