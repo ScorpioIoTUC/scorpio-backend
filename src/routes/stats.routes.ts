@@ -8,7 +8,7 @@ export const buildStatsRoutes = (): Router => {
 
   router.get('/count-station-monthly-packets', statsController.countStationMonthlyPacketsHandler);
   router.get('/count-active-stations', statsController.countActiveStationsHandler);
-  router.get('/count-total-stations', statsController.countTotalPacketsHandler);
+  router.get('/count-total-packets', statsController.countTotalPacketsHandler);
 
   return router;
 };
