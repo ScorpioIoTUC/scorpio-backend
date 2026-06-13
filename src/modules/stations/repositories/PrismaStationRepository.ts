@@ -71,8 +71,9 @@ export class PrismaStationRepository implements StationRepository {
     async findAll(query: ListStationsDTO): Promise<Station[]> {
         const limit = query.limit ?? 100;
         const page = query.page ?? 1;
+        const ownerId = query.ownerId ?? undefined;
         const stations = await prisma.station.findMany({
-            where: query.ownerId !== undefined ? { owner_id: query.ownerId } : undefined,
+            where: { owner_id: ownerId },
             orderBy: { id: 'asc' },
             skip: (page - 1) * limit,
             take: limit,

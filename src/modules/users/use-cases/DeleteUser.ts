@@ -1,5 +1,4 @@
 import { UserRepository } from '../repositories/UserRepository';
-
 export class DeleteUser {
   constructor(private readonly userRepository: UserRepository) {}
 
