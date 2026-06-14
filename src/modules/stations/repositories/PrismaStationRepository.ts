@@ -1,7 +1,7 @@
 import { CreateStationDTO } from "../dto/CreateStationDTO";
 import { ListStationsDTO } from "../dto/ListStationsDTO";
 import { UpdateStationDTO } from "../dto/UpdateStationDTO";
-import { StationRepository } from "./StationRepository";
+import { StationAuthData, StationRepository } from "./StationRepository";
 import { Station, StationCredentials } from "../entities/Station";
 import { prisma } from '../../../lib/prisma';
 import crypto from "crypto";
@@ -88,12 +88,13 @@ export class PrismaStationRepository implements StationRepository {
         return station ? toDomainStation(station) : null;
     }
 
-    async findAuthByUuid(uuid: string): Promise<{ id: number; uuid: string; ownerKeyHash: string } | null> {
+    async findAuthByUuid(uuid: string): Promise<StationAuthData | null> {
         const station = await prisma.station.findUnique({
             where: { uuid },
             select: {
                 id: true,
                 uuid: true,
+                name: true,
                 owner_key_hash: true,
             },
         });
@@ -101,6 +102,7 @@ export class PrismaStationRepository implements StationRepository {
             ? {
                 id: station.id,
                 uuid: station.uuid,
+                name: station.name,
                 ownerKeyHash: station.owner_key_hash,
             }
             : null;

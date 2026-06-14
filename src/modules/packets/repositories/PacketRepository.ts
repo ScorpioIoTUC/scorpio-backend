@@ -4,8 +4,19 @@ import { ListPacketsDTO } from '../dto/ListPacketsDTO';
 import { ListPacketsResponseDTO } from '../dto/ListPacketsResponseDTO';
 import { PrismaPacketRepository } from './PrismaPacketRepository';
 
+export interface CreatedPacketEventData {
+  stationUuid: string;
+  stationName: string;
+  satelliteNoradId: number;
+  satelliteDisplayName: string;
+  rssi: number;
+  snr: number;
+  crc: boolean;
+  createdAt: Date;
+}
+
 export interface PacketRepository {
-	create(data: CreatePacketDTO, stationId: number, satelliteId: number): Promise<void>;
+	create(data: CreatePacketDTO, stationId: number, satelliteId: number): Promise<CreatedPacketEventData>;
 	findAll(query: ListPacketsDTO): Promise<ListPacketsResponseDTO>;
 	deleteAll(query: DeletePacketsDTO): Promise<void>;
 }

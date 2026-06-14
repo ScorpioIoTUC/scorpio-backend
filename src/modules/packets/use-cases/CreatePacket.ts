@@ -3,6 +3,7 @@ import { CreatePacketDTO } from '../dto/CreatePacketDTO';
 import { PacketRepository } from '../repositories/PacketRepository';
 import { SatelliteRepository } from '../../satellites/repositories/SatelliteRepository';
 import { StationRepository } from '../../stations/repositories/StationRepository';
+import { emitPacketCreated } from '../../../lib/socket';
 
 export interface CreatePacketResultDTO {
   success: boolean;
@@ -60,7 +61,11 @@ export class CreatePacket {
 
     const satellite = await this.satelliteRepository.findOrCreateByNoradId(data.noradId);
 
-    await this.packetRepository.create(data, station.id, satellite.id);
+    const createdPacket = await this.packetRepository.create(data, station.id, satellite.id);
+    emitPacketCreated({
+      ...createdPacket,
+      createdAt: createdPacket.createdAt.toISOString(),
+    });
     await this.stationRepository.updateLastSeen(station.uuid);
 
     return {
