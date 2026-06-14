@@ -4,7 +4,7 @@ import { CreatePacketDTO } from '../dto/CreatePacketDTO';
 import { DeletePacketsDTO } from '../dto/DeletePacketsDTO';
 import { ListPacketsDTO } from '../dto/ListPacketsDTO';
 import { ListPacketsResponseDTO } from '../dto/ListPacketsResponseDTO';
-import { PacketRepository } from './PacketRepository';
+import { CreatedPacketEventData, PacketRepository } from './PacketRepository';
 
 const toPacketPayload = (rawPayload: CreatePacketDTO['rawPayload']): Uint8Array<ArrayBuffer> => {
   if (typeof rawPayload === 'string') {
@@ -91,8 +91,8 @@ const buildWhere = (query: ListPacketsDTO): Prisma.PacketWhereInput | undefined 
 };
 
 export class PrismaPacketRepository implements PacketRepository {
-  async create(data: CreatePacketDTO, stationId: number, satelliteId: number): Promise<void> {
-    await prisma.packet.create({
+  async create(data: CreatePacketDTO, stationId: number, satelliteId: number): Promise<CreatedPacketEventData> {
+    const packet = await prisma.packet.create({
       data: {
         station_id: stationId,
         satellite_id: satelliteId,
@@ -107,7 +107,22 @@ export class PrismaPacketRepository implements PacketRepository {
         crc: data.crc,
         raw_payload: toPacketPayload(data.rawPayload),
       },
+      include: {
+        station: { select: { uuid: true, name: true } },
+        satellite: { select: { norad_id: true, display_name: true } },
+      },
     });
+
+    return {
+      stationUuid: packet.station.uuid,
+      stationName: packet.station.name,
+      satelliteNoradId: packet.satellite.norad_id,
+      satelliteDisplayName: packet.satellite.display_name,
+      rssi: packet.rssi,
+      snr: packet.snr,
+      crc: packet.crc,
+      createdAt: packet.created_at,
+    };
   }
 
   async findAll(query: ListPacketsDTO): Promise<ListPacketsResponseDTO> {

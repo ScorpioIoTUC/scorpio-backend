@@ -7,6 +7,7 @@ import { PrismaStationRepository } from './PrismaStationRepository';
 export interface StationAuthData {
     id: number;
     uuid: string;
+    name: string;
     ownerKeyHash: string;
 }
 
