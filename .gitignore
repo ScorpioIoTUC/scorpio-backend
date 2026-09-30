@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 
 /src/generated/prisma
 data/
+db_data/
+dist-seed/
