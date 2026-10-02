@@ -1,0 +1,34 @@
+name: Scorpio CD
+on:
+  push:
+    branches:
+      - deploy
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scorpio-cd-deploy
+  cancel-in-progress: false
+
+jobs:
+  deployment-trigger:
+    # TODO: Implement actual deployment to VM and health verification.
+    name: Deployment trigger only 
+    if: github.ref == 'refs/heads/deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record deployment candidate
+        shell: bash
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          {
+            echo '## CD trigger verified'
+            echo
+            printf 'Event: `%s`\n\n' "$EVENT_NAME"
+            printf 'Candidate commit: `%s`\n\n' "$COMMIT_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"
